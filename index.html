@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para Atiz 🤍</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --rosa-fuerte: #ff4d6d;
+            --rosa-claro: #ffccd5;
+            --blanco-cristal: rgba(255, 255, 255, 0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #000;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden;
+        }
+
+        .bg-gradient {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(45deg, #ff4d6d, #ff8fa3, #ffb3c1, #590d22);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            z-index: -2;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        #overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            color: white;
+            transition: 1s;
+        }
+
+        .btn-open {
+            background: var(--rosa-fuerte);
+            border: none;
+            padding: 20px 40px;
+            color: white;
+            font-size: 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 20px var(--rosa-fuerte);
+            transition: 0.3s;
+            font-family: 'Dancing Script', cursive;
+        }
+
+        .container {
+            position: relative;
+            width: 90%;
+            max-width: 500px;
+            padding: 40px;
+            background: var(--blanco-cristal);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 25px 45px rgba(0,0,0,0.2);
+            opacity: 0;
+            transform: scale(0.8);
+            transition: 1s all ease;
+        }
+
+        .container.show { opacity: 1; transform: scale(1); }
+
+        h1 { font-family: 'Dancing Script', cursive; font-size: 3rem; margin-bottom: 10px; }
+
+        .counter {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 20px;
+            margin: 20px 0;
+        }
+
+        .time-part span { display: block; font-size: 1.8rem; font-weight: 600; color: var(--rosa-claro); }
+        .time-part label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1px; }
+
+        .btn-surprise {
+            margin-top: 20px;
+            background: white;
+            color: var(--rosa-fuerte);
+            border: none;
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        #photoModal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 2000;
+        }
+
+        #photoModal img {
+            max-width: 80%;
+            max-height: 60vh;
+            border: 5px solid white;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(255,255,255,0.2);
+        }
+
+        .heart-particle { position: absolute; color: rgba(255, 255, 255, 0.5); pointer-events: none; }
+    </style>
+</head>
+<body>
+
+<div class="bg-gradient"></div>
+
+<div id="overlay">
+    <button class="btn-open" onclick="start()">Toca para empezar</button>
+</div>
+
+<div class="container" id="card">
+    <h1>Atiz</h1>
+    <p style="margin: 20px 0; font-style: italic;">
+        "No quiero un infinito donde no estés, si no puedo estar a tu lado compartiendo las risas tontas, las conversaciones largas o incluso esos silencios que solo se sienten bien contigo.
+Si el infinito existe, me gusta pensar que empieza cuando dejamos de ser uno y nos elegimos como dos. Y si no existe, no pasa nada… solo hasta dos ya es suficiente."
+    </p>
+
+    <div class="counter">
+        <div class="time-part"><span id="days">0</span><label>Días</label></div>
+        <div class="time-part"><span id="hours">0</span><label>Hrs</label></div>
+        <div class="time-part"><span id="mins">0</span><label>Min</label></div>
+        <div class="time-part"><span id="secs">0</span><label>Seg</label></div>
+    </div>
+
+    <button class="btn-surprise" onclick="showSurprise()">...</button>
+</div>
+
+<div id="photoModal" onclick="closeSurprise()">
+    <img src="tu-foto.jpg" alt="Nosotros">
+    <p style="color: white; margin-top: 20px; font-family: 'Dancing Script'; font-size: 2rem;">¡Te amo!</p>
+    <p style="color: #ccc; font-size: 0.8rem;">(Toca para cerrar)</p>
+</div>
+
+<audio id="player" loop>
+    <source src="musica.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+    // Fecha configurada: 15 de Noviembre de 2025
+    const startDate = new Date(2025, 10, 15, 0, 0, 0); 
+
+    function start() {
+        document.getElementById('overlay').style.opacity = '0';
+        setTimeout(() => {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('card').classList.add('show');
+        }, 1000);
+        
+        const player = document.getElementById('player');
+        // Iniciar audio en el segundo 23
+        player.currentTime = 23; 
+        player.play();
+        
+        setInterval(createHeart, 300);
+    }
+
+    function showSurprise() {
+        document.getElementById('photoModal').style.display = 'flex';
+    }
+
+    function closeSurprise() {
+        document.getElementById('photoModal').style.display = 'none';
+    }
+
+    function createHeart() {
+        const heart = document.createElement('div');
+        heart.classList.add('heart-particle');
+        heart.innerHTML = '❤️';
+        heart.style.left = Math.random() * 100 + 'vw';
+        heart.style.top = '-5vh';
+        document.body.appendChild(heart);
+        heart.animate([{ transform: `translateY(0)` }, { transform: `translateY(105vh)` }], {
+            duration: Math.random() * 3000 + 3000
+        });
+        setTimeout(() => heart.remove(), 6000);
+    }
+
+    function updateCounter() {
+        const now = new Date();
+        const diff = now - startDate;
+        document.getElementById('days').innerText = Math.floor(diff / (1000 * 60 * 60 * 24));
+        document.getElementById('hours').innerText = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        document.getElementById('mins').innerText = Math.floor((diff / 1000 / 60) % 60);
+        document.getElementById('secs').innerText = Math.floor((diff / 1000) % 60);
+    }
+
+    setInterval(updateCounter, 1000);
+    updateCounter();
+</script>
+
+</body>
+</html>
